@@ -1,10 +1,10 @@
-module AstrodynamicsTests exposing (..)
+module AstrodynamicsTests exposing (almostEqualTest, cartesianToKeplerian, modTwoPiTest, moduloTest)
 
+import Astrodynamics exposing (..)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Test exposing (..)
-import Astrodynamics exposing (..)
-import Vector3 as V3 exposing (Float3)
+import Vector3d as V3 exposing (Vector3d)
 
 
 almostEqualTest : Test
@@ -60,35 +60,35 @@ modTwoPiTest =
 cartesianToKeplerian : Test
 cartesianToKeplerian =
     let
-        ( semiMajorAxis, eccentricity, inclination, ascendingNode, argumentOfPericenter, trueAnomaly ) =
+        keplerianElements =
             Astrodynamics.keplerian
-                ( 1131.34, -2282.343, 6672.423 )
-                ( -5.64305, 4.30333, 2.42879 )
+                (V3.fromComponents ( 1131.34, -2282.343, 6672.423 ))
+                (V3.fromComponents ( -5.64305, 4.30333, 2.42879 ))
                 3.986004418e5
     in
-        describe "Cartesian coordinates to Keplerian elements conversion"
-            [ test "Semi-major axis" <|
-                \_ ->
-                    semiMajorAxis
-                        |> Expect.within (Expect.Relative sqrtEps) 7200.470581180567
-            , test "Eccentricity" <|
-                \_ ->
-                    eccentricity
-                        |> Expect.within (Expect.Relative sqrtEps) 0.008100116890743586
-            , test "Inclination" <|
-                \_ ->
-                    inclination
-                        |> Expect.within (Expect.Relative sqrtEps) 1.7208944567902595
-            , test "Right Ascension of Ascending Node" <|
-                \_ ->
-                    ascendingNode
-                        |> Expect.within (Expect.Relative sqrtEps) 5.579892976386111
-            , test "Argument of Pericenter" <|
-                \_ ->
-                    argumentOfPericenter
-                        |> Expect.within (Expect.Relative sqrtEps) 1.2370820968712155
-            , test "True Anomaly" <|
-                \_ ->
-                    trueAnomaly
-                        |> Expect.within (Expect.Relative sqrtEps) 7.194559370904103e-5
-            ]
+    describe "Cartesian coordinates to Keplerian elements conversion"
+        [ test "Semi-major axis" <|
+            \_ ->
+                keplerianElements.semiMajorAxis
+                    |> Expect.within (Expect.Relative sqrtEps) 7200.470581180567
+        , test "Eccentricity" <|
+            \_ ->
+                keplerianElements.eccentricity
+                    |> Expect.within (Expect.Relative sqrtEps) 0.008100116890743586
+        , test "Inclination" <|
+            \_ ->
+                keplerianElements.inclination
+                    |> Expect.within (Expect.Relative sqrtEps) 1.7208944567902595
+        , test "Right Ascension of Ascending Node" <|
+            \_ ->
+                keplerianElements.ascendingNode
+                    |> Expect.within (Expect.Relative sqrtEps) 5.579892976386111
+        , test "Argument of Pericenter" <|
+            \_ ->
+                keplerianElements.argumentOfPericenter
+                    |> Expect.within (Expect.Relative sqrtEps) 1.2370820968712155
+        , test "True Anomaly" <|
+            \_ ->
+                keplerianElements.trueAnomaly
+                    |> Expect.within (Expect.Relative sqrtEps) 7.194559370904103e-5
+        ]
