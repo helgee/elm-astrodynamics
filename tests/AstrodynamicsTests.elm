@@ -60,11 +60,17 @@ modTwoPiTest =
 cartesianToKeplerian : Test
 cartesianToKeplerian =
     let
+        r =
+            V3.fromComponents ( 1131.34, -2282.343, 6672.423 )
+
+        v =
+            V3.fromComponents ( -5.64305, 4.30333, 2.42879 )
+
         keplerianElements =
-            Astrodynamics.keplerian
-                (V3.fromComponents ( 1131.34, -2282.343, 6672.423 ))
-                (V3.fromComponents ( -5.64305, 4.30333, 2.42879 ))
-                3.986004418e5
+            Astrodynamics.keplerian r v muEarth
+
+        ( r1, v1 ) =
+            Astrodynamics.cartesian keplerianElements muEarth
     in
     describe "Cartesian coordinates to Keplerian elements conversion"
         [ test "Semi-major axis" <|
@@ -91,4 +97,28 @@ cartesianToKeplerian =
             \_ ->
                 keplerianElements.trueAnomaly
                     |> Expect.within (Expect.Relative sqrtEps) 7.194559370904103e-5
+        , test "rx" <|
+            \_ ->
+                V3.xComponent r1
+                    |> Expect.within (Expect.Relative sqrtEps) (V3.xComponent r)
+        , test "ry" <|
+            \_ ->
+                V3.yComponent r1
+                    |> Expect.within (Expect.Relative sqrtEps) (V3.yComponent r)
+        , test "rz" <|
+            \_ ->
+                V3.zComponent r1
+                    |> Expect.within (Expect.Relative sqrtEps) (V3.zComponent r)
+        , test "vx" <|
+            \_ ->
+                V3.xComponent v1
+                    |> Expect.within (Expect.Relative sqrtEps) (V3.xComponent v)
+        , test "vy" <|
+            \_ ->
+                V3.yComponent v1
+                    |> Expect.within (Expect.Relative sqrtEps) (V3.yComponent v)
+        , test "vz" <|
+            \_ ->
+                V3.zComponent v1
+                    |> Expect.within (Expect.Relative sqrtEps) (V3.zComponent v)
         ]

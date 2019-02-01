@@ -1,6 +1,7 @@
 module Astrodynamics exposing
     ( almostEqual
     , almostEqualRtolAtol
+    , cartesian
     , eps
     , keplerian
     , modTwoPi
@@ -9,6 +10,7 @@ module Astrodynamics exposing
     , sqrtEps
     )
 
+import Axis3d
 import Direction3d
 import Vector3d as V3 exposing (Vector3d)
 
@@ -174,3 +176,49 @@ keplerian r v mu =
     , argumentOfPericenter = argumentOfPericenter
     , trueAnomaly = trueAnomaly
     }
+
+
+perifocal : Float -> Float -> Float -> Float -> ( Vector3d, Vector3d )
+perifocal semiLatus eccentricity trueAnomaly mu =
+    let
+        ca =
+            cos trueAnomaly
+
+        sa =
+            sin trueAnomaly
+    in
+    ( V3.fromComponents
+        ( semiLatus * ca / (1 + eccentricity * ca)
+        , semiLatus * sa / (1 + eccentricity * ca)
+        , 0.0
+        )
+    , V3.fromComponents
+        ( -(sqrt (mu / semiLatus)) * sa
+        , sqrt (mu / semiLatus) * (eccentricity + ca)
+        , 0.0
+        )
+    )
+
+
+cartesian : KeplerianElements -> Float -> ( Vector3d, Vector3d )
+cartesian elements mu =
+    let
+        semiLatus =
+            if almostEqual elements.eccentricity 0 then
+                elements.semiMajorAxis
+
+            else
+                elements.semiMajorAxis * (1 - elements.eccentricity ^ 2)
+
+        ( rPerifocal, vPerifocal ) =
+            perifocal semiLatus elements.eccentricity elements.trueAnomaly mu
+    in
+    ( rPerifocal
+        |> V3.rotateAround Axis3d.z elements.argumentOfPericenter
+        |> V3.rotateAround Axis3d.x elements.inclination
+        |> V3.rotateAround Axis3d.z elements.ascendingNode
+    , vPerifocal
+        |> V3.rotateAround Axis3d.z elements.argumentOfPericenter
+        |> V3.rotateAround Axis3d.x elements.inclination
+        |> V3.rotateAround Axis3d.z elements.ascendingNode
+    )
