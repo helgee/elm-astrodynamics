@@ -1,10 +1,211 @@
-module AstrodynamicsTests exposing (almostEqualTest, cartesianToKeplerian, modTwoPiTest, moduloTest)
+module AstrodynamicsTests exposing
+    ( almostEqualTest
+    , cartesianToKeplerian
+    , dateTest
+    , modTwoPiTest
+    , moduloTest
+    )
 
 import Astrodynamics exposing (..)
+import Date exposing (..)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
+import Result
 import Test exposing (..)
 import Vector3d as V3 exposing (Vector3d)
+
+
+unwrapDate : Result String Date -> Date
+unwrapDate res =
+    Result.withDefault julianEpochDate res
+
+
+dateTest : Test
+dateTest =
+    let
+        dayNumbers =
+            [ -2451546
+            , -2451545
+            , -730122
+            , -730121
+            , -182554
+            , -182553
+            , -182552
+            , -152385
+            , -152384
+            , -146039
+            , -146038
+            , -146037
+            , -109514
+            , -109513
+            , -72990
+            , -72989
+            , -51546
+            , -51545
+            , -1
+            , 0
+            , 58
+            , 59
+            , 60
+            ]
+
+        dates =
+            [ Date.fromYearMonthDay -4713 12 31
+            , Date.fromYearMonthDay -4712 1 1
+            , Date.fromYearMonthDay 0 12 31
+            , Date.fromYearMonthDay 1 1 1
+            , Date.fromYearMonthDay 1500 2 28
+            , Date.fromYearMonthDay 1500 2 29
+            , Date.fromYearMonthDay 1500 3 1
+            , Date.fromYearMonthDay 1582 10 4
+            , Date.fromYearMonthDay 1582 10 15
+            , Date.fromYearMonthDay 1600 2 28
+            , Date.fromYearMonthDay 1600 2 29
+            , Date.fromYearMonthDay 1600 3 1
+            , Date.fromYearMonthDay 1700 2 28
+            , Date.fromYearMonthDay 1700 3 1
+            , Date.fromYearMonthDay 1800 2 28
+            , Date.fromYearMonthDay 1800 3 1
+            , Date.fromYearMonthDay 1858 11 15
+            , Date.fromYearMonthDay 1858 11 16
+            , Date.fromYearMonthDay 1999 12 31
+            , Date.fromYearMonthDay 2000 1 1
+            , Date.fromYearMonthDay 2000 2 28
+            , Date.fromYearMonthDay 2000 2 29
+            , Date.fromYearMonthDay 2000 3 1
+            ]
+                |> List.map unwrapDate
+
+        years =
+            [ -4713
+            , -4712
+            , 0
+            , 1
+            , 1500
+            , 1500
+            , 1500
+            , 1582
+            , 1582
+            , 1600
+            , 1600
+            , 1600
+            , 1700
+            , 1700
+            , 1800
+            , 1800
+            , 1858
+            , 1858
+            , 1999
+            , 2000
+            , 2000
+            , 2000
+            , 2000
+            ]
+
+        months =
+            [ 12
+            , 1
+            , 12
+            , 1
+            , 2
+            , 2
+            , 3
+            , 10
+            , 10
+            , 2
+            , 2
+            , 3
+            , 2
+            , 3
+            , 2
+            , 3
+            , 11
+            , 11
+            , 12
+            , 1
+            , 2
+            , 2
+            , 3
+            ]
+
+        days =
+            [ 31
+            , 1
+            , 31
+            , 1
+            , 28
+            , 29
+            , 1
+            , 4
+            , 15
+            , 28
+            , 29
+            , 1
+            , 28
+            , 1
+            , 28
+            , 1
+            , 15
+            , 16
+            , 31
+            , 1
+            , 28
+            , 29
+            , 1
+            ]
+    in
+    describe "Test Date module"
+        [ test "This is the last day in the proleptic Julian calendar" <|
+            \_ ->
+                fromDayNumber -730122
+                    |> unwrapDate
+                    |> getCalendar
+                    |> Expect.equal ProlepticJulianCalendar
+        , test "This is the first day in the Julian calendar" <|
+            \_ ->
+                fromDayNumber -730121
+                    |> unwrapDate
+                    |> getCalendar
+                    |> Expect.equal JulianCalendar
+        , test "This is the last day in the Julian calendar" <|
+            \_ ->
+                fromDayNumber -152385
+                    |> unwrapDate
+                    |> getCalendar
+                    |> Expect.equal JulianCalendar
+        , test "This is the first day in the Gregorian calendar" <|
+            \_ ->
+                fromDayNumber -152384
+                    |> unwrapDate
+                    |> getCalendar
+                    |> Expect.equal GregorianCalendar
+        , test "Years are equal" <|
+            \_ ->
+                dayNumbers
+                    |> List.map fromDayNumber
+                    |> List.map unwrapDate
+                    |> List.map getYear
+                    |> Expect.equalLists years
+        , test "Months are equal" <|
+            \_ ->
+                dayNumbers
+                    |> List.map fromDayNumber
+                    |> List.map unwrapDate
+                    |> List.map getMonth
+                    |> Expect.equalLists months
+        , test "Days are equal" <|
+            \_ ->
+                dayNumbers
+                    |> List.map fromDayNumber
+                    |> List.map unwrapDate
+                    |> List.map getDay
+                    |> Expect.equalLists days
+        , test "J2000 days are equal" <|
+            \_ ->
+                dates
+                    |> List.map getJ2000
+                    |> Expect.equalLists dayNumbers
+        ]
 
 
 almostEqualTest : Test
