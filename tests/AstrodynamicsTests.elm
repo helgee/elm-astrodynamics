@@ -10,6 +10,7 @@ module AstrodynamicsTests exposing
 import AstroTime exposing (..)
 import Astrodynamics exposing (..)
 import Date exposing (..)
+import Epoch exposing (..)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Result
@@ -259,6 +260,16 @@ timeTest =
                     |> unwrapTime
                     |> AstroTime.toString
                     |> Expect.equal "13:04:31.416"
+        ]
+
+
+epochTest : Test
+epochTest =
+    describe "Test Epoch module"
+        [ test "Test component constructor" <|
+            \_ ->
+                Epoch.fromComponents TAI 2000 1 1 12 0 0.0
+                    |> Expect.ok
         ]
 
 

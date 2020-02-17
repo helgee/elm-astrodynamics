@@ -2,8 +2,10 @@ module AstroTime exposing
     ( Time
     , fromHourMinuteSecond
     , getHour
+    , getMillisecond
     , getMinute
     , getSecond
+    , getWholeSecond
     , midnight
     , noon
     , toString
