@@ -4,8 +4,10 @@ module AstrodynamicsTests exposing
     , dateTest
     , modTwoPiTest
     , moduloTest
+    , timeTest
     )
 
+import AstroTime exposing (..)
 import Astrodynamics exposing (..)
 import Date exposing (..)
 import Expect exposing (Expectation)
@@ -205,6 +207,46 @@ dateTest =
                 dates
                     |> List.map getJ2000
                     |> Expect.equalLists dayNumbers
+        , test "To String" <|
+            \_ ->
+                Date.fromYearMonthDay 2000 1 1
+                    |> unwrapDate
+                    |> Date.toString
+                    |> Expect.equal "2000-01-01"
+        ]
+
+
+unwrapTime : Result String Time -> Time
+unwrapTime res =
+    case res of
+        Err _ ->
+            noon
+
+        Ok time ->
+            time
+
+
+timeTest : Test
+timeTest =
+    describe "Test Time module"
+        [ test "Test hour check" <|
+            \_ ->
+                AstroTime.fromHourMinuteSecond 24 59 59.0
+                    |> Expect.err
+        , test "Test minute check" <|
+            \_ ->
+                AstroTime.fromHourMinuteSecond 23 60 59.0
+                    |> Expect.err
+        , test "Test second check" <|
+            \_ ->
+                AstroTime.fromHourMinuteSecond 23 59 61.0
+                    |> Expect.err
+        , test "To String" <|
+            \_ ->
+                AstroTime.fromHourMinuteSecond 13 4 31.415926535897
+                    |> unwrapTime
+                    |> AstroTime.toString
+                    |> Expect.equal "13:04:31.416"
         ]
 
 
