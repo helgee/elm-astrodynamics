@@ -213,6 +213,18 @@ dateTest =
                     |> unwrapDate
                     |> Date.toString
                     |> Expect.equal "2000-01-01"
+        , test "Not a leap year" <|
+            \_ ->
+                Date.fromYearMonthDay 2018 2 29
+                    |> Expect.err
+        , test "Month too low" <|
+            \_ ->
+                Date.fromYearMonthDay 2018 0 1
+                    |> Expect.err
+        , test "Month too high" <|
+            \_ ->
+                Date.fromYearMonthDay 2018 13 1
+                    |> Expect.err
         ]
 
 
